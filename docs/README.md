@@ -2,6 +2,7 @@
 ## Решение СЛАУ методом Жордана-Гаусса
 
 # Очистка и пересборка
+```bash
 rm -rf build
 cmake -B build
 cmake --build build
