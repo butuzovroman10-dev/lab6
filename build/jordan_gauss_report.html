@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Решение СЛАУ методом Жордана-Гаусса</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #3498db;
+        }
+        
+        .system-equations {
+            display: grid;
+            gap: 10px;
+            font-size: 1.2em;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .equation {
+            padding: 10px 15px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .steps-container {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .step {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+        
+        .step-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .step-number {
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .step-operation {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .matrix {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .matrix-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 5px 0;
+        }
+        
+        .matrix-element {
+            padding: 5px 10px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .solution {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .solution-values {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .solution-value {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .fraction-solution {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .check-results {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .check-equation {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 5px;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .solution-values {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 Решение СЛАУ</h1>
+            <div class="subtitle">Метод Жордана-Гаусса</div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <div class="section-title">
+                    <span>📋 Исходная система</span>
+                </div>
+                <div class="system-equations">
+                    <div class="equation">4x - y + 3z = 12</div>
+                    <div class="equation">2x + 2y - z = 4</div>
+                    <div class="equation">x + y + z = 6</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span>🔄 Процесс решения</span>
+                </div>
+                <div class="steps-container">
+        <div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 1</div>
+        <div class="step-operation">Начальная матрица</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">4.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">12.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.000</div>
+            <div class="matrix-element">2.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">4.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">6.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 2</div>
+        <div class="step-operation">Перестановка строк 1 и 3</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-0.250</div>
+            <div class="matrix-element">0.750</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.000</div>
+            <div class="matrix-element">2.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">4.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">6.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 3</div>
+        <div class="step-operation">R2 = R2 - 2×R1, R3 = R3 - 4×R1</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-0.250</div>
+            <div class="matrix-element">0.750</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">2.500</div>
+            <div class="matrix-element">-2.500</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">-2.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.250</div>
+            <div class="matrix-element">0.250</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 4</div>
+        <div class="step-operation">Перестановка строк 2 и 3</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-0.250</div>
+            <div class="matrix-element">0.750</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">-0.800</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.250</div>
+            <div class="matrix-element">0.250</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">3.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 5</div>
+        <div class="step-operation">Нормализация строки 2</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.500</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.800</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">-0.800</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.500</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">4.000</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 6</div>
+        <div class="step-operation">Исключение x из строки 1</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.500</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.800</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">-1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">-0.800</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.667</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+<div class="step">
+    <div class="step-header">
+        <div class="step-number">Шаг 7</div>
+        <div class="step-operation">Нормализация строки 3</div>
+    </div>
+    <div class="matrix">
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.467</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">1.867</div>
+            <div class="matrix-element">|</div>
+        </div>
+        <div class="matrix-row">
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">0.000</div>
+            <div class="matrix-element">1.000</div>
+            <div class="matrix-element">|</div>
+            <div class="matrix-element">2.667</div>
+            <div class="matrix-element">|</div>
+        </div>
+    </div>
+</div>
+
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span>✅ Результат</span>
+                </div>
+                <div class="solution">
+                    <h3>Решение системы</h3>
+                    <div class="solution-values">
+        <div class="solution-value">x = 1.466667</div><div class="solution-value">y = 1.866667</div><div class="solution-value">z = 2.666667</div>
+                    </div>
+                    <div class="fraction-solution">
+                        <div>Точное решение в дробях:</div>
+                        <div>x = 22/15, y = 28/15, z = 8/3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">
+                    <span>🔍 Проверка решения</span>
+                </div>
+                <div class="check-results">
+        <div class="check-equation"><span>4x - y + 3z = 12</span><span>Невязка: 0.00e+00</span></div><div class="check-equation"><span>2x + 2y - z = 4</span><span>Невязка: -4.44e-16</span></div><div class="check-equation"><span>x + y + z = 6</span><span>Невязка: 0.00e+00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Анимация появления шагов
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+            
+            // Изначальные стили для анимации
+            steps.forEach(step => {
+                step.style.opacity = '0';
+                step.style.transform = 'translateY(20px)';
+                step.style.transition = 'all 0.5s ease';
+            });
+        });
+    </script>
+</body>
+</html>
